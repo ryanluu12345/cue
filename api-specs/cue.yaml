@@ -1,0 +1,128 @@
+swagger: '2.0'
+info:
+  description: This is cue's starter API
+  version: 1.0.0
+  title: Cue API
+  # put the contact info for your development or API team
+  contact:
+    email: you@your-company.com
+
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+# tags are used for organizing operations
+tags:
+- name: admins
+  description: Secured Admin-only calls
+- name: developers
+  description: Operations available to regular developers
+
+paths:
+  /cue:
+    get:
+      tags:
+      - developers
+      summary: gets a specific cue or cues based on a set of filters
+      operationId: getCue
+      description: |
+        By passing in the appropriate options, you can retrieve certain cues in the system
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: searchTerm
+        description: pass an optional search term to filter the cues returned
+        required: false
+        type: string
+      - in: query
+        name: skip
+        description: number of records to skip for pagination
+        type: integer
+        format: int32
+        minimum: 0
+      - in: query
+        name: limit
+        description: maximum number of records to return
+        type: integer
+        format: int32
+        minimum: 0
+        maximum: 50
+      responses:
+        200:
+          description: search results matching criteria
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CueItem'
+        400:
+          description: bad input parameter
+    post:
+      tags:
+      - developers
+      summary: creates a new cue item
+      operationId: createCue
+      description: Creates a new cue
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: cueItem
+        description: Cue message to add
+        schema:
+          $ref: '#/definitions/CueItem'
+      responses:
+        201:
+          description: item created
+        400:
+          description: invalid input, object invalid
+        409:
+          description: an existing item already exists
+
+definitions:
+  CueItem:
+    type: object
+    required:
+    - id
+    - message
+    - timestamp
+    - releaseDate
+    - author
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: d290f1ee-6c54-4b01-90e6-d701748f0851
+      message:
+        type: string
+        example: "This is a really cool link to an amazing song: https://open.spotify.com/track/5dXWFMwD7I7zXsInONVl0H?si=42f5ade7c25949d2"
+      timestamp:
+        type: integer
+        example: 1650439191
+      author:
+        $ref: '#/definitions/Author'
+  Author:
+    type: object
+    required:
+    - id
+    - name
+    - profile_img_link
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: d290f1ee-6c54-4b01-90e6-d701748f0851
+      name:
+        type: string
+        example: "Simu"
+      profile_img_link:
+        type: string
+        example: https://media.blogto.com/articles/20210906-simu-liu-stock-photos.jpg?w=2048&cmd=resize_then_crop&height=1365&quality=70
+
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+basePath: /cue/api/v1/
+schemes:
+ - https
