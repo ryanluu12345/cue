@@ -80,6 +80,162 @@ paths:
           description: invalid input, object invalid
         409:
           description: an existing item already exists
+  
+  /user/auth:
+    get:
+      tags:
+      - developers
+      description: gets OAuth token
+      operationId: login
+      produces:
+      - application/json
+      response:
+        201:
+          description: OAuth token granted for user
+        400:
+          description: invalid request / failed
+    delete:
+      tags:
+      - developers
+      description: terminates OAuth token
+      operationId: logout
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      response:
+        200:
+          description: OAuth token revoked for user
+        400:
+          description: invalid request / failed
+
+  # todo: how does one know which topic the cue is created in above?
+  # Consider having cues tied to a user, not a topic?
+  # todo: in impl, need to make sure that user is authenticated (OAuth)
+
+  # implementation: topic id is tied to user, so send request to that user
+  /follow/{topicId}:
+    # get: get all requests for the topic, owning user allowed
+
+    # todo: guard against owning user from doing these things?
+    post:
+      tags:
+      - developers
+      description: creates follow request to a cue topic
+      operationId: followTopic
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: topicId
+        required: true
+        schema:
+          type: string
+          format: uuid
+          minimum: 1
+        description: id of cue topic to request follow
+      - in: body
+        name: user
+        description: requesting user info
+        schema:
+          $ref: '#/definitions/User'
+      response:
+        201:
+          description: successfully requested
+        400:
+          description: invalid request
+        
+    delete:
+      tags:
+      - developers
+      description: unfollow cue topic
+      operationId: unfollowTopic
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: topicId
+        required: true
+        schema:
+          type: string
+          format: uuid
+          minimum: 1
+        description: id of cue topic to unfollow
+      - in: body
+        name: user
+        description: info of user unfollowing
+        schema:
+          $ref: '#/definitions/User'
+      response:
+        201:
+          description: successfully unfollowed
+        400:
+          description: invalid request
+
+
+  /follow/{requestId}:
+    # only owning user is allowed to grant
+    post:
+      tags:
+      - developers
+      description: accept follow request 
+      operationId: acceptFollow
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: requestId
+        required: true
+        schema:
+          type: string
+          format: uuid
+          minimum: 1
+        description: follow request id
+      - in: body
+        name: user
+        description: owning user info
+        schema:
+          $ref: '#/definitions/User'
+      response:
+        200:
+          description: grant requesting user access to topic
+        400:
+          description: failed to grant access
+    
+    delete:
+      tags:
+      - developers
+      description: delete/reject follow request 
+      operationId: rejectFollow
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: requestId
+        required: true
+        schema:
+          type: string
+          format: uuid
+          minimum: 1
+        description: follow request id
+      - in: body
+        name: user
+        description: owning user info
+        schema:
+          $ref: '#/definitions/User'
+      response:
+        200:
+          description: reject follow request
+        400:
+          description: failed to reject access
 
 definitions:
   CueItem:
@@ -102,8 +258,8 @@ definitions:
         type: integer
         example: 1650439191
       author:
-        $ref: '#/definitions/Author'
-  Author:
+        $ref: '#/definitions/User'
+  User:
     type: object
     required:
     - id
