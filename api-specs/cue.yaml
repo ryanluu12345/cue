@@ -18,6 +18,7 @@ tags:
 - name: developers
   description: Operations available to regular developers
 
+# TODO: generally add the put, patch and delete routes
 paths:
   /cue:
     get:
@@ -81,7 +82,6 @@ paths:
         409:
           description: an existing item already exists
 
-  # TODO
   /cueTopic:
     get:
       tags:
@@ -133,7 +133,7 @@ paths:
       parameters:
       - in: body
         name: cueItem
-        description: Cue message to add
+        description: Cue list to add
         schema:
           $ref: '#/definitions/CueTopic'
       responses:
@@ -143,6 +143,70 @@ paths:
           description: invalid input, object invalid
         409:
           description: an existing item already exists
+
+  # TODO: add cue list privacy
+  /cueList:
+    get:
+      tags:
+      - developers
+      summary: gets metadata about a cue list
+      operationId: getCueList
+      description: |
+        By passing in the appropriate options, you can retrieve certain cue lists
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: searchTerm
+        description: pass an optional search term to filter the cue lists returned
+        required: false
+        type: string
+      - in: query
+        name: skip
+        description: number of records to skip for pagination
+        type: integer
+        format: int32
+        minimum: 0
+      - in: query
+        name: limit
+        description: maximum number of records to return
+        type: integer
+        format: int32
+        minimum: 0
+        maximum: 50
+      responses:
+        200:
+          description: search results matching criteria
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CueList'
+        400:
+          description: bad input parameter
+    post:
+      tags:
+      - developers
+      summary: creates a new cue list
+      operationId: createCueList
+      description: Creates a new cue
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: cueItem
+        description: Cue list to add
+        schema:
+          $ref: '#/definitions/CueList'
+      responses:
+        201:
+          description: item created
+        400:
+          description: invalid input, object invalid
+        409:
+          description: an existing item already exists
+    
     
 definitions:
   CueItem:
@@ -185,6 +249,40 @@ definitions:
       description:
         type: string
         example: "Ryan Luu's topic to discuss big data"
+      created_at:
+        type: integer
+        example: 1650439191
+      updated_at:
+        type: integer
+        example: 1932489191
+      author:
+        $ref: '#/definitions/Author'
+  CueList:
+    type: object
+    required:
+    - id
+    - name
+    - description
+    - tags
+    - created_at
+    - updated_at
+    - author
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: d290f1ee-6c54-4b01-90e6-d701748f0851
+      name:
+        type: string
+        example: "general-technology"
+      description:
+        type: string
+        example: "A general collection of technology cues"
+      tags: 
+        type: array
+        items: 
+          type: string
+        example: ['food', 'blogging']
       created_at:
         type: integer
         example: 1650439191
