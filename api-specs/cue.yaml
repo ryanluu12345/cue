@@ -81,14 +81,76 @@ paths:
         409:
           description: an existing item already exists
 
+  # TODO
+  /cueTopic:
+    get:
+      tags:
+      - developers
+      summary: gets metadata about a cue topic for a given user
+      operationId: getCueTopic
+      description: |
+        By passing in the appropriate options, you can retrieve certain cue topics
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: searchTerm
+        description: pass an optional search term to filter the cue topics returned
+        required: false
+        type: string
+      - in: query
+        name: skip
+        description: number of records to skip for pagination
+        type: integer
+        format: int32
+        minimum: 0
+      - in: query
+        name: limit
+        description: maximum number of records to return
+        type: integer
+        format: int32
+        minimum: 0
+        maximum: 50
+      responses:
+        200:
+          description: search results matching criteria
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CueTopic'
+        400:
+          description: bad input parameter
+    post:
+      tags:
+      - developers
+      summary: creates a new cue item
+      operationId: createCueTopic
+      description: Creates a new cue
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: cueItem
+        description: Cue message to add
+        schema:
+          $ref: '#/definitions/CueTopic'
+      responses:
+        201:
+          description: item created
+        400:
+          description: invalid input, object invalid
+        409:
+          description: an existing item already exists
+    
 definitions:
   CueItem:
     type: object
     required:
     - id
     - message
-    - timestamp
-    - releaseDate
+    - created_at
     - author
     properties:
       id:
@@ -98,9 +160,37 @@ definitions:
       message:
         type: string
         example: "This is a really cool link to an amazing song: https://open.spotify.com/track/5dXWFMwD7I7zXsInONVl0H?si=42f5ade7c25949d2"
-      timestamp:
+      created_at:
         type: integer
         example: 1650439191
+      author:
+        $ref: '#/definitions/Author'
+  CueTopic:
+    type: object
+    required:
+    - id
+    - name
+    - description
+    - created_at
+    - updated_at
+    - author
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: d290f1ee-6c54-4b01-90e6-d701748f0851
+      name:
+        type: string
+        example: "rluu-big-data"
+      description:
+        type: string
+        example: "Ryan Luu's topic to discuss big data"
+      created_at:
+        type: integer
+        example: 1650439191
+      updated_at:
+        type: integer
+        example: 1932489191
       author:
         $ref: '#/definitions/Author'
   Author:
